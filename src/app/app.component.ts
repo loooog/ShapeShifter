@@ -11,6 +11,13 @@ import {
 } from './store';
 import { isActionMode } from './store/actionmode/selectors';
 import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
+import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
@@ -34,6 +41,18 @@ const STORAGE_KEY_FIRST_TIME_USER = 'storage_key_first_time_user';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('slideInOut', [
+      state('inactive', style({ width: '*' })),
+      state('active', style({ width: 0 })),
+      transition('inactive => active', [
+        animate(300, style({ width: 0 })),
+      ]),
+      transition('active => inactive', [
+        animate(300, style({ width: '*' })),
+      ]),
+    ]),
+  ],
 })
 export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly ACTION_SOURCE_FROM = ActionSource.From;
@@ -46,6 +65,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly displayBoundsSubject = new BehaviorSubject<Size>({ w: 1, h: 1 });
   canvasBounds$: Observable<Size>;
   isActionMode$: Observable<boolean>;
+  actionModeState$: Observable<string>;
 
   constructor(
     private readonly snackBar: MdSnackBar,
@@ -71,6 +91,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         return w1 === w2 && h1 === h2;
       });
     this.isActionMode$ = this.store.select(isActionMode);
+    this.actionModeState$ = this.isActionMode$.map(isActive => isActive ? 'active' : 'inactive');
     this.canvasBounds$ = Observable.combineLatest(displaySize$, this.isActionMode$)
       .map(([{ w, h }, shouldShowThreeCanvases]) => {
         return { w: w / (shouldShowThreeCanvases ? 3 : 1), h };

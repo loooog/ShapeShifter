@@ -36,7 +36,7 @@
       <app-playback></app-playback>
     </div>
     <!-- Property input panel. -->
-    <app-propertyinput *ngIf="!(this.isActionMode$ | async)"
+    <app-propertyinput [@slideInOut]="this.actionModeState$ | async"
       fxLayout="column">
     </app-propertyinput>
   </div>
